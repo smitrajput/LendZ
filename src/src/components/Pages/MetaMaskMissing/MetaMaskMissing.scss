@@ -1,0 +1,76 @@
+.MetaMaskMissingWrapper {
+  background-image: linear-gradient(30deg, rgba(115, 75, 212, .9), rgba(159, 117, 235, .9)), url('../../../assets/images/Back.svg'), linear-gradient(30deg, #734bd4, #a075eb);
+  background-position: 0 0px, 50% 50%, 0 0;
+  background-size: auto, contain, auto;
+  background-repeat: repeat, no-repeat, repeat;
+  height: 100vh;
+
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  font-family: Sfprodisplay, sans-serif;
+
+  .MetaMaskMissing {
+    max-width: 350px;
+    margin: 0 auto;
+    text-align: center;
+    width: 80%;
+
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  h2 {
+    color: #f7f7f7;
+    font-family: Sfprotext, sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 50px;
+    margin-bottom: 35px;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.53);
+    font-family: Sfprodisplay, sans-serif;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    line-height: 22px;
+    margin-bottom: 0;
+    margin-top: 50px;
+
+    a {
+      color: #3b1f7e;
+      font-weight: 300;
+  
+      &:hover {
+        color: #22114d;
+        text-decoration: none;
+      }
+    }
+  }
+
+  img {
+    animation: fading 1.5s .5s infinite;
+    opacity: 0.65;
+    transform: scale3d(1.0, 1.0, 1.0);
+    transform-style: preserve-3d;
+  }
+  @keyframes fading {
+    0% {
+      opacity: 0.65;
+      transform: scale3d(1.0, 1.0, 1.0);
+    }
+
+    50% {
+      opacity: 0.35;
+      transform: scale3d(0.9, 0.9, 1.0);
+    }
+
+    100% {
+      opacity: 0.65;
+      transform: scale3d(1.0, 1.0, 1.0);
+    }
+  }
+}

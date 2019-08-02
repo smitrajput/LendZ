@@ -1,0 +1,101 @@
+.react-tabs {
+  margin-top: 40px;
+  @media (max-width: 1024px) {
+    margin-top: 30px;
+  }
+  @media (max-width: 425px) {
+    margin-top: 20px;
+  }
+
+  .react-tabs__tab-list {
+    border-bottom-color: #9f74f1;
+    margin-bottom: 0;
+
+    .react-tabs__tab {
+      padding: 6px 25px;
+      font-size: 18px;
+      @media (max-width: 1024px) {
+        padding: 5px 15px;
+        font-size: 1em;
+      }
+      @media (max-width: 425px) {
+        padding: 5px 7px;
+        font-size: 0.6em;
+      }
+
+      &.react-tabs__tab--selected {
+        border-color: #9f74f1;
+        color: #9f74f1;
+      }
+    }
+  }
+
+  .react-tabs__tab-panel {
+    padding: 30px 20px 20px;
+    border: 1px solid #9f74f1;
+    border-top: 0;
+  }
+}
+
+.dropdown {
+  .dropdown-toggle.btn.btn-secondary,
+  .dropdown-toggle.btn.btn-secondary:active {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    color: #9166ed;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .dropdown-menu.show,
+  .dropdown-menu[x-placement^=bottom] {
+    right: 0;
+  }
+
+  .dropdown-item {
+    color: #9166ed;
+
+    &.active,
+    &:active {
+      background-color: #8357ea;
+    }
+  }
+
+  .dropdown-header {
+    padding-top: 0;
+  }
+
+  *,
+  .btn {
+    font-size: 14px;
+  }
+}
+
+.SuffixDropDown {
+  position: relative;
+  left: 5px;
+
+  .dropdown-toggle.btn.btn-secondary,
+  .dropdown-toggle.btn.btn-secondary:active {
+    padding: 0 5px;
+    border: none;
+  }
+
+  .dropdown-menu.show {
+    min-width: 70px;
+    left: -5px !important;
+    padding: 4px 0;
+
+    .dropdown-item {
+      padding: 1px 10px;
+      line-height: 1.5;
+    }
+  }
+}
