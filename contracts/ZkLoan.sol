@@ -14,7 +14,7 @@ contract ZkLoan {
         bytes32 noteHash;
     }
 
-    event BorrowerAccessRequested(bytes32 indexed kernelHash, address indexed borrower);
+    event BorrowerAccessRequested(bytes32 indexed kernelHash, address indexed borrower, bytes indexed pubKey);
     event BorrowerAccessGranted(bytes32 indexed kernelHash, address indexed borrower);
     // Events of the protocol.
     event ProtocolParameterUpdateNotification(string _notification_key, address indexed _address, uint256 _notification_value);
@@ -75,9 +75,9 @@ contract ZkLoan {
     }
 
 
-    function requestAccess(bytes32 _kernelHash) public {
+    function requestAccess(bytes32 _kernelHash, bytes memory pubKey) public {
         borrowerApprovals[_kernelHash][msg.sender] = '0x';
-        emit BorrowerAccessRequested(_kernelHash, msg.sender);
+        emit BorrowerAccessRequested(_kernelHash, msg.sender, pubKey);
     }
 
     function approveAccess(bytes32 _kernelHash, address _borrower, bytes memory _sharedSecret) public {

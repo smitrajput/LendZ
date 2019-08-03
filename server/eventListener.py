@@ -12,13 +12,10 @@ class EventListener:
 
 
     def __init__(self):
-        # Create .env file path.
-        # dotenv_path = join(dirname(__file__), '.env')
-        # Load file from the path & store the environment variables
-        # load_dotenv(dotenv_path)
+
         self.url = "http://localhost:8545/"
-        self.walletSocketAddress = "0x35D8a615F9486647C41492c34d6B346Bf98f74bC"
-        # self.walletSocketAddress = "0x61A73ba8253c304A0ccBb6809a424969F79D4FC7"
+        self.ZkLoansAddress = "TBD"
+        # self.ZkLoansAddress = "0x61A73ba8253c304A0ccBb6809a424969F79D4FC7"
 
         # Connect Web3 to a provider & check connection
         self.web3 = Web3(HTTPProvider(self.url))
@@ -30,14 +27,9 @@ class EventListener:
         # self.noteCreated_socket = self.__createZmqSocket("tcp://127.0.0.1:5555/")
 
         # Create signatures of events to subscribe to (these will be 'topic0' of the logs)
-        self.noteCreated_event_signature = self.web3.sha3(text = "setVersionEvent(uint256)").hex()
+        self.borrowerAccessRequested_event_signature = self.web3.sha3(text = "BorrowerAccessRequested(bytes32,address,bytes)").hex()
+        self.borrowerAccessGranted_event_signature = self.web3.sha3(text = "BorrowerAccessGranted(bytes32,address)").hex()
 
-    # Function to create a 0MQ Socket based on event type
-    # def __createZmqSocket(self, eventType):
-    #     context = zmq.Context()
-    #     zmq_socket = context.socket(zmq.PUSH)
-    #     zmq_socket.bind(eventType)
-    #     return zmq_socket
 
     def __createEventFilter(self, contractAddress, eventSignature):
         return self.web3.eth.filter({
@@ -46,31 +38,41 @@ class EventListener:
         })
 
 
-    # Function to handle 'NoteCreated()' event
-    def __handleNoteCreated(self, event_topics):
-        # print("Asset Address:", "0x" + event_topics[1].hex()[26:])
-        # print("Owner:", "0x" + event_topics[2].hex()[26:])
-        # print("NoteHash:", event_topics[3].hex())
+    # Function to handle 'BorrowAccessRequested()' event
+    def __handleBorrowAccessRequested(self, event_topics):
         print(event_topics)
 
-        noteDetails = {
-            "data":event_topics[1].hex()
-            # "assetAddress": "0x" + event_topics[1].hex()[26:],
-            # "owner": "0x" + event_topics[2].hex()[26:],
-            # "noteHash": event_topics[3].hex()
+        data = {
+            "kernelHash": event_topics[1].hex(),
+            "borrower": "0x" + event_topics[2].hex()[26:],
+            "pubKey": ""
         }
-        data = noteDetails
-        print ("post data ", noteDetails);
-        r = requests.post('http://localhost:8000/kernel/', json = data)
+        print ("post data: ", data);
+        r = requests.post('http://localhost:8000/kernel/accessRequested', json = data)
         response = r.json()
         print ("resonse : ", response)
-        # self.noteCreated_socket.send_json(noteDetails)
+
+    # Function to handle 'BorrowAccessGranted()' event
+    def __handleBorrowAccessGranted(self, event_topics):
+        print(event_topics)
+
+        data = {
+            "kernelHash": event_topics[1].hex(),
+            "borrower": "0x" + event_topics[2].hex()[26:]
+        }
+        print ("post data: ", data);
+        r = requests.post('http://localhost:8000/kernel/accessGranted', json = data)
+        response = r.json()
+        print ("resonse : ", response)
 
     # Function to handle all events subscribed to
     def __handle_event(self, event):
-        if(event["topics"][0].hex() == self.noteCreated_event_signature):
+        if(event["topics"][0].hex() == self.borrowAccessRequested_event_signature):
             # print(event)
-            self.__handleNoteCreated(event["topics"])
+            self.__handleBorrowAccessRequested(event["topics"])
+        else if(event["topics"][0].hex() == self.borrowAccessGranted_event_signature):
+            # print(event)
+            self.__handleBorrowAccessGranted(event["topics"])
 
 
     async def __log_loop(self, event_filter, poll_interval):
@@ -83,7 +85,8 @@ class EventListener:
     # Start the listener service
     def startListener(self):
         # Create event filters for all events to be subscribed to
-        noteCreatedEventFilter = self.__createEventFilter(self.walletSocketAddress, self.noteCreated_event_signature)
+        borrowAccessRequestedEventFilter = self.__createEventFilter(self.ZkLoansAddress, self.borrowAccessRequested_event_signature)
+        borrowAccessGrantedEventFilter = self.__createEventFilter(self.ZkLoansAddress, self.borrowAccessGranted_event_signature)
 
         loop = uvloop.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -91,7 +94,8 @@ class EventListener:
         try:
             loop.run_until_complete(
                 asyncio.gather(
-                    self.__log_loop(noteCreatedEventFilter, 2)
+                    self.__log_loop(borrowAccessRequestedEventFilter, 2),
+                    self.__log_loop(borrowAccessGrantedEventFilter, 2)
                 )
             )
         finally:
