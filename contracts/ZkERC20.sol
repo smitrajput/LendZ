@@ -5,15 +5,15 @@ import "./AZTEC/ERC1724/ZkAsset.sol";
 contract ZkERC20 is ZkAsset{
 
     event Log(address owner, uint256 value, bytes32 noteHash);
-    event LogString(string value);
+    // event LogString(string value);
 
-    address aceAddress;
+    address public aceAddress;
     address public erc20Address;
 
     constructor(
         address _aceAddress,
         address _erc20Address
-    ) public ZkAsset(_aceAddress, address(_erc20Address), 1, false, true) {
+    ) public ZkAsset(_aceAddress, address(_erc20Address), 1) {
         aceAddress = _aceAddress;
         erc20Address = _erc20Address;
     }
@@ -22,6 +22,10 @@ contract ZkERC20 is ZkAsset{
         ACE aceContract = ACE(aceAddress);
         aceContract.publicApprove(address(this), _proofHash, _value);
         emit Log(aceAddress, _value, _proofHash);
+    }
+
+    function getACE() external view returns(address){
+        return aceAddress;
     }
 
 }

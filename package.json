@@ -1,0 +1,35 @@
+{
+  "name": "lendz",
+  "version": "1.0.0",
+  "description": "ETHIndia 2.0 project",
+  "main": "truffle-config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smitrajput/LendZ.git"
+  },
+  "engines": {
+    "yarn": "1.15.2"
+  },
+  "dependencies": {
+    "@aztec/dev-utils": "0.12.2",
+    "@aztec/protocol": "0.9.1",
+    "@aztec/secp256k1": "1.0.1",
+    "aztec.js": "0.11.0",
+    "dotenv": "^8.0.0",
+    "web3": "1.0.0-beta.34"
+  },
+  "keywords": [
+    "Lendroid",
+    "AZTEC",
+    "ETHIndia"
+  ],
+  "author": "Smit Rajput, Tezan Sahu, Akash Kumar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/smitrajput/LendZ/issues"
+  },
+  "homepage": "https://github.com/smitrajput/LendZ#readme"
+}
