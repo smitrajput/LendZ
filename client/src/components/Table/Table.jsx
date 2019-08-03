@@ -3,7 +3,7 @@ import moment from 'moment'
 import Modal from 'react-modal'
 
 import InputModal from '../common/InputModal/InputModal'
-
+import newTable from './newTable'
 import './Table.scss'
 
 Modal.setAppElement('body')
@@ -379,67 +379,71 @@ class Table extends Component {
                     : d.loanCurrency
                   // console.log(filteredData)
                   return (
-                    <tr key={dIndex}>
-                      <button onClick={this.onView}>View</button>
-                      {this.state.viewLoan ?
-                        <div>{data.headers.map((h, hIndex) => (
-                          <td key={hIndex} style={h.style}>
-                            {this.getDisplayData(d, h)}
-                          </td>
-                        ))}</div>
-                        :
-                        <div></div>}
+                    // <tr key={dIndex}>
+                    //   <button onClick={this.onView}>View</button>
+                    //   {this.state.viewLoan ?
+                    //     <div>{data.headers.map((h, hIndex) => (
+                    //       <td key={hIndex} style={h.style}>
+                    //         {this.getDisplayData(d, h)}
+                    //       </td>
+                    //     ))}</div>
+                    //     :
+                    //     <div></div>}
 
-                      {/* <div>Hi!</div> */}
-                      <td>
-                        {data.action.label === '3-dot' ? (
-                          <button
-                            style={data.action.style}
-                            className="three-dot"
-                          >
-                            <div className="dot" />
-                            <div className="dot" />
-                            <div className="dot" />
-                          </button>
-                        ) : (
-                            <button
-                              style={data.action.style}
-                              onClick={() => {
-                                if (
-                                  data.action.slot === 'onOrder' &&
-                                  allowances[token] < 1000000
-                                ) {
-                                  const { fieldLoading } = this.state
-                                  if (fieldLoading[token]) return
-                                  fieldLoading[token] = true
-                                  this.setState({ fieldLoading }, () =>
-                                    this.onAllowance(token, token)
-                                  )
-                                } else {
-                                  this.onAction(data.action, d)
-                                }
-                              }}
-                            >
-                              <div
-                                className={fieldLoading[token] ? 'Loading' : ''}
-                              >
-                                {fieldLoading[token] && (
-                                  <div className="Loader" />
-                                )}
-                              </div>
-                              {data.action.slot === 'onOrder' &&
-                                allowances[token] < 1000000 ? (
-                                  <div>
-                                    <span>Unlock </span>
-                                    {token}
-                                  </div>
-                                ) : (
-                                  data.action.label
-                                )}
-                            </button>
-                          )}
-                      </td>
-                    </tr>
+                      // <div>Hi!</div>
+                      <div>
+                        <newTable />
+                      </div>
+                      
+                    //   <td>
+                    //     {data.action.label === '3-dot' ? (
+                    //       <button
+                    //         style={data.action.style}
+                    //         className="three-dot"
+                    //       >
+                    //         <div className="dot" />
+                    //         <div className="dot" />
+                    //         <div className="dot" />
+                    //       </button>
+                    //     ) : (
+                    //         <button
+                    //           style={data.action.style}
+                    //           onClick={() => {
+                    //             if (
+                    //               data.action.slot === 'onOrder' &&
+                    //               allowances[token] < 1000000
+                    //             ) {
+                    //               const { fieldLoading } = this.state
+                    //               if (fieldLoading[token]) return
+                    //               fieldLoading[token] = true
+                    //               this.setState({ fieldLoading }, () =>
+                    //                 this.onAllowance(token, token)
+                    //               )
+                    //             } else {
+                    //               this.onAction(data.action, d)
+                    //             }
+                    //           }}
+                    //         >
+                    //           <div
+                    //             className={fieldLoading[token] ? 'Loading' : ''}
+                    //           >
+                    //             {fieldLoading[token] && (
+                    //               <div className="Loader" />
+                    //             )}
+                    //           </div>
+                    //           {data.action.slot === 'onOrder' &&
+                    //             allowances[token] < 1000000 ? (
+                    //               <div>
+                    //                 <span>Unlock </span>
+                    //                 {token}
+                    //               </div>
+                    //             ) : (
+                    //               data.action.label
+                    //             )}
+                    //         </button>
+                    //       )}
+                    //   </td>
+                    // </tr>
                   )
                 })}
                 {filteredData.length === 0 && (

@@ -5,6 +5,7 @@
   "dependencies": {
     "@aztec/guacamole-ui": "^1.1.0-beta3",
     "@makerdao/dai": "^0.7.1",
+    "@material-ui/core": "^4.3.1",
     "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
     "bootstrap": "^4.1.1",
@@ -33,6 +34,7 @@
     "redux-actions": "^2.4.0",
     "redux-saga": "^0.16.0",
     "redux-thunk": "^2.2.0",
+    "semantic-ui-react": "^0.87.3",
     "underscore": "^1.9.1"
   },
   "engines": {

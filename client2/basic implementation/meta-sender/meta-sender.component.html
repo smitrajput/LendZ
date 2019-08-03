@@ -1,0 +1,154 @@
+<!-- <mat-card>
+    <mat-card-header>Balance</mat-card-header>
+    <mat-card-content>
+        <mat-form-field id="address-selector" class="address-field">
+            <mat-select name="account" (selectionChange)="refreshBalance()" [(value)]="model.account"
+                placeholder="Address">
+                <mat-option *ngFor="let account of accounts" [value]="account">{{account}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <p>You have <span id="balance">{{model.balance}}</span> META tokens </p>
+    </mat-card-content>
+</mat-card> -->
+
+<!-- <mat-card>
+    <mat-card-header>Send MetaCoin to your friend </mat-card-header>
+    <mat-card-content>
+        <mat-form-field>
+            <input type="text" matInput id="amount" placeholder="Amount" (change)="setAmount($event)">
+        </mat-form-field>
+        <mat-form-field class="address-field">
+            <input type="text" matInput id="receiver" placeholder="Receiver Address" (change)="setReceiver($event)">
+        </mat-form-field>
+        <button mat-button id="send" (click)="sendCoin()">Send MetaCoin</button>
+    </mat-card-content>
+</mat-card> -->
+
+
+<mat-card>
+    <mat-card-header>Send Eth to your friend </mat-card-header>
+    <mat-card-content>
+        <mat-form-field>
+            <input type="text" matInput id="eth_amount" placeholder="Eth Amount" (change)="setEthAmount($event)">
+        </mat-form-field>
+        <mat-form-field class="address-field">
+            <input type="text" matInput id="eth_receiver" placeholder="eth Receiver Address"
+                (change)="setEthReceiver($event)">
+        </mat-form-field>
+        <button mat-button id="sendEth" (click)="sendEth()">Send Eth</button>
+    </mat-card-content>
+</mat-card>
+
+<mat-card>
+    <mat-card-header>Get Weth ERC20 Token : </mat-card-header>
+    <mat-card-content>
+        <mat-form-field>
+            <input type="text" matInput id="weth_amount" placeholder="Weth Amount" (change)="setWethAmount($event)">
+        </mat-form-field>
+        <button mat-button color="accent" id="getWeth" (click)="getWeth()">Get WETH</button>
+        <button mat-button color="accent" id="updateWeth" (click)="updateWethBalance()">Update WETH and ZRX Balance</button>
+        <p> Eth balance : {{model.eth_balance}}</p>
+        <p> Weth balance : {{model.weth_balance}}</p>
+        <p> ZRX balance : {{model.zrx_balance}}</p>
+    </mat-card-content>
+</mat-card>
+
+<mat-card>
+    <mat-card-header>get possible tokens for trading : </mat-card-header>
+    <br>
+    <mat-card-content>
+        <button mat-button color="accent" mat-button id="zrkapprove" (click)="print_pairs()"> Get Token Pairs </button>
+        <!-- <span> </span> -->
+        <!-- <button mat-button color="accent" id="getWeth" (click)="getWeth()"> get 0.1 Weth </button> -->
+        <p id="approval"> </p>
+    </mat-card-content>
+</mat-card>
+
+<mat-card>
+    <mat-card-header></mat-card-header>
+    <mat-card-content>
+    <mat-form-field>
+            <input type="text" matInput id="weth_amount" placeholder=" token to sell" (change)="set_sell_token($event)">
+    </mat-form-field>
+         
+    <mat-form-field>
+            <input type="text" matInput id="weth_amount" placeholder="token you want to buy" (change)="set_buy_token($event)">
+    </mat-form-field>
+    <button mat-button color="accent" mat-button id="zrkapprove" (click)="check_trade()"> Check Trade possibility </button>
+        <!-- <span> </span> -->
+        <!-- <button mat-button color="accent" id="getWeth" (click)="getWeth()"> get 0.1 Weth </button> -->
+        <p id="trade_possible" *ngIf=model.trade_possible>{{model.trade_possible}} </p>
+    </mat-card-content>
+</mat-card>
+
+<mat-card>
+    <mat-card-header>Approvals for trading : </mat-card-header>
+    <br>
+    <mat-card-content>
+        <button mat-button color="accent" mat-button id="zrkapprove" (click)="zrkapprove()"> Set approvals </button>
+         <span> </span>
+         <p id="approval_status" *ngIf=model.approval_status>{{model.approval_status}} </p> 
+        <!-- <button mat-button color="accent" id="getWeth" (click)="getWeth()"> get 0.1 Weth </button> -->
+        <p id="approval" *ngIf=model.approval_tx> You can view the transaction on etherscan : <a href={{model.approval_tx}} target='_blank'>transaction</a>
+        </p>
+    </mat-card-content>
+</mat-card>
+
+<mat-card>
+    <mat-card-header>Orders from the order Book : </mat-card-header>
+    <br>
+    <mat-card-content>
+        <button mat-button color="accent" id="getOrderBook" (click)="getOrderBook()"> Get Order book </button>
+        <div *ngIf=model.order_available>
+        <p> the best order available on the orderbook : </p>
+        <p>{{this.model.sell_token}} : {{this.model.max_sell_amount}}</p>
+        <p>{{this.model.buy_token}} : {{this.model.max_buy_amount}}</p>
+        <p>{{this.model.price}}</p>
+        
+        
+        </div>
+        
+        <!-- <mat-form-field>
+            <input type="text" matInput id="eth_amount" placeholder="Eth Amount" (change)="setEthAmount($event)">
+        </mat-form-field> -->
+        <!-- <mat-form-field class="address-field">
+            <input type="text" matInput id="eth_receiver" placeholder="eth Receiver Address"
+                (change)="setEthReceiver($event)">
+        </mat-form-field> -->
+        <p id="orders">{{model.orders}} </p>
+    </mat-card-content>
+</mat-card>
+
+<mat-card *ngIf=model.order_available>
+    <mat-card-header>Respective Token Balances : </mat-card-header>
+    <br>
+    <mat-card-content>
+        <p >{{model.balance_sell_token}}</p>
+        <p >{{model.balance_buy_token}}</p>
+        <button mat-button color="accent" id="validate" (click)="updateCurrentTokenBalance()"> Update Token Balances</button>
+        <!-- <button mat-button color="accent" id="fill" (click)="fillOrder()"> Fill</button> -->
+    </mat-card-content>
+</mat-card>
+
+
+
+<mat-card>
+    <mat-card-header>Fill the order </mat-card-header>
+    <br>
+    <mat-card-content>
+        <mat-form-field>
+            <input type="text" matInput id="fill_amount" placeholder=" amount of token to sell " (change)="set_fill_amount($event)">
+        </mat-form-field>
+        <span>(Default : the amount in order)</span>
+        <br>
+
+        <button mat-button color="accent" id="validate" (click)="validate_filling_order()"> Validate the order</button>
+        <p style="color:green">{{model.validation_message}}</p>
+        <!-- <button mat-button color="accent" id="validate" (click)="validate_filling_order()"> Validate the order</button> -->
+        <button mat-button color="accent" id="fill" (click)="fillOrder()"> Fill</button>
+        <p id="fillOrderstatus" *ngIf=model.fill_status>{{model.fill_status}} </p>
+        <p id="fillOrder" *ngIf=model.fill_tx> You can view the transaction on etherscan : <a href={{model.fill_tx}} target='_blank'>transaction</a>
+        </p>
+    </mat-card-content>
+</mat-card>
