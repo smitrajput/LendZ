@@ -45,7 +45,7 @@ class Header extends Component {
     return (
       <div className="HeaderWrapper">
         <div className="Inner">
-          <div className="Logo">Reloanr</div>
+          <div className="Logo">LendZ</div>
           <div className="Header">
             <div className="Info Address">
               <div className="Label">Address</div>

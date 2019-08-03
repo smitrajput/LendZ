@@ -5,11 +5,11 @@ const fillZero = (len = 40) => {
 const checkLoanCanBeLiquidated = data => {
   return (
     data.origin.userAddress.toLowerCase() ===
-      data.origin.wrangler.toLowerCase() ||
+    data.origin.wrangler.toLowerCase() ||
     (data.origin.expiresAtTimestamp < Date.now() &&
       data.status === 'Active' &&
       data.origin.userAddress.toLowerCase() ===
-        data.origin.lender.toLowerCase())
+      data.origin.lender.toLowerCase())
   )
 }
 
@@ -17,7 +17,7 @@ const checkLoanCanBeClosed = data => {
   return (
     data.origin.expiresAtTimestamp > Date.now() &&
     data.origin.userAddress.toLowerCase() ===
-      data.origin.borrower.toLowerCase() &&
+    data.origin.borrower.toLowerCase() &&
     data.status === 'Active'
   )
 }

@@ -578,7 +578,7 @@ class FormTab extends Component {
 
     return (
       <div className="TabWrapper">
-        <div className="Title">WHAT ARE YOU UP TO TODAY?</div>
+        <div className="Title"></div>
         <Tabs
           selectedIndex={this.state.tabIndex}
           onSelect={this.onTabChange.bind(this)}
