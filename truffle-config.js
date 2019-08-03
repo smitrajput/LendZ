@@ -79,6 +79,9 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
+    bail: true,
+    enableTimeouts: false,
+    reporter: "spec",
     // timeout: 100000
   },
 

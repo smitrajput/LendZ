@@ -17,14 +17,14 @@ contract ZkLoan {
     event BorrowerAccessRequested(bytes32 indexed kernelHash, address indexed borrower, bytes indexed pubKey);
     event BorrowerAccessGranted(bytes32 indexed kernelHash, address indexed borrower);
     // Events of the protocol.
-    event ProtocolParameterUpdateNotification(string _notification_key, address indexed _address, uint256 _notification_value);
-    event PositionUpdateNotification(address indexed _wrangler, address indexed _position_address, string _notification_key, uint256 _notification_value);
+    // event ProtocolParameterUpdateNotification(string _notification_key, address indexed _address, uint256 _notification_value);
+    // event PositionUpdateNotification(address indexed _wrangler, address indexed _position_address, string _notification_key, uint256 _notification_value);
 
     // Variables of the protocol.
     address public protocol_token_address;
     address public owner;
     // kernel
-    address kernel_address;
+    address public kernel_address;
 
     // all positions
     // mapping(bytes32 => address) public positions;
@@ -113,17 +113,17 @@ contract ZkLoan {
     //     return true;
     // }
 
-    // function set_wrangler_status(address _address, bool _is_active) public returns (bool) {
-    //     require(msg.sender == owner, "Sender must be owner");
-    //     wranglers[_address] = _is_active;
-    //     emit ProtocolParameterUpdateNotification("wrangler_status", _address, _is_active?1:0);
-    //     return true;
-    // }
+    function set_wrangler_status(address _address, bool _is_active) public returns (bool) {
+        require(msg.sender == owner, "Sender must be owner");
+        wranglers[_address] = _is_active;
+        // emit ProtocolParameterUpdateNotification("wrangler_status", _address, _is_active?1:0);
+        return true;
+    }
 
     function set_token_support(address _address, bool _is_active) public returns (bool) {
         require (msg.sender == owner, "Sender must be owner");
         supported_tokens[_address] = _is_active;
-        emit ProtocolParameterUpdateNotification("token_support", _address, _is_active?1:0);
+        // emit ProtocolParameterUpdateNotification("token_support", _address, _is_active?1:0);
         return true;
     }
 
@@ -189,8 +189,10 @@ contract ZkLoan {
         // uint256 _approvalExpiresAt,
         bytes memory lendProof,
         bytes memory lendSign,
+        bytes memory lendProofOutput,
         bytes memory collateralProof,
-        bytes memory collateralSign
+        bytes memory collateralSign,
+        bytes memory collateralProofOutput
     ) internal {
         Position _new_position = new Position(
             [_kernel_creator, _addresses[0], _addresses[1], _addresses[2], _addresses[3], _addresses[4], _addresses[5]],
@@ -198,7 +200,7 @@ contract ZkLoan {
             [last_position_index, _intValues[0], _intValues[1], _intValues[3]]
         );
 
-        address _new_position_address = address(_new_position);
+        
 
         // _new_position_hash = Position(_new_position).getHash();
         // Position memory _new_position = Position({
@@ -236,35 +238,40 @@ contract ZkLoan {
         // validate wrangler's signature
         // require (is_signer(_new_position.wrangler, _new_position.hash, _sig_data), "Incorrect signatures");
         // update position index
-        position_index[last_position_index] = _new_position_address;
+        position_index[last_position_index] = address(_new_position);
         last_position_index += 1;
         // positions[_new_position_hash] = _new_position;
         // record position
-        record_position(_addresses[0], _addresses[1], _new_position_address);
+        record_position(_addresses[0], _addresses[1], address(_new_position));
 
         // Transfer collateral from borrower to contract
         (bytes memory _proofOutputs) = ACE(ZkERC20(_addresses[4]).getACE()).validateProof(JOIN_SPLIT_PROOF, address(this), collateralProof);
         (bytes memory _proofInputNotes, bytes memory _proofOutputNotes, ,) = _proofOutputs.get(0).extractProofOutput();
-        require(_noteCoderToStruct(_proofOutputNotes.get(0)).noteHash == _noteHashes[0]);
+        require(_noteCoderToStruct(_proofOutputNotes.get(0)).noteHash == _noteHashes[0], "Collateral output note not matching");
+
+        // require(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash == _noteHashes[3], "Collateral input note not matching");
+
         ZkERC20(_addresses[4]).confidentialApprove(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash, address(this), true, collateralSign);
-        ZkERC20(_addresses[4]).confidentialTransferFrom(JOIN_SPLIT_PROOF, _proofOutputs);
+        // 
+        ZkERC20(_addresses[4]).confidentialTransferFrom(JOIN_SPLIT_PROOF, collateralProofOutput);
+        // 
 
         // Transfer lend tokens from lender to borrower
         (_proofOutputs) = ACE(ZkERC20(_addresses[5]).getACE()).validateProof(JOIN_SPLIT_PROOF, address(this), lendProof);
         (_proofInputNotes, _proofOutputNotes, ,) = _proofOutputs.get(0).extractProofOutput();
-        require(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash == _noteHashes[1]);
+        require(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash == _noteHashes[1], "lend note not matching");
         ZkERC20(_addresses[5]).confidentialApprove(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash, address(this), true, lendSign);
-        ZkERC20(_addresses[5]).confidentialTransferFrom(JOIN_SPLIT_PROOF, _proofOutputs);
+        ZkERC20(_addresses[5]).confidentialTransferFrom(JOIN_SPLIT_PROOF, lendProofOutput);
+        // require(1==0, "dummy");
 
         // transfer monitoring_fee from lender to wrangler
-        bool token_transfer = ERC20( protocol_token_address).transferFrom(
+        ERC20( protocol_token_address).transferFrom(
             _addresses[0],
             _addresses[3],
             _intValues[1]
         );
-        require(token_transfer);
         // notify wrangler that a position has been opened
-        emit PositionUpdateNotification(_addresses[3], _new_position_address, "status",  POSITION_STATUS_OPEN);
+        // emit PositionUpdateNotification(_addresses[3], _new_position_address, "status",  POSITION_STATUS_OPEN);
         // unlock position_non_reentrant after loan creation
         // unlock_position(_new_position.hash);
     }
@@ -301,7 +308,7 @@ contract ZkLoan {
 
 
         // Notify wrangler that a position has been closed
-        emit PositionUpdateNotification(existing_position.getWrangler(), address(existing_position), "status",  POSITION_STATUS_CLOSED);
+        // emit PositionUpdateNotification(existing_position.getWrangler(), address(existing_position), "status",  POSITION_STATUS_CLOSED);
         // unlock position_non_reentrant after closure
         // unlock_position(_position_hash);
 
@@ -327,10 +334,12 @@ contract ZkLoan {
         // bytes memory _sig_data_wrangler,
         bytes memory lendProof,
         bytes memory lendSign,
+        bytes memory lendProofOutput,
         bytes memory collateralProof,
-        bytes memory collateralSign
+        bytes memory collateralSign,
+        bytes memory collateralProofOutput
         // v, r, s of kernel_creator and wrangler
-        ) public returns (bool){
+        ) public {
 
             // validate _collateralToken is a contract address
             require(supported_tokens[_addresses[4]]);
@@ -356,8 +365,8 @@ contract ZkLoan {
                 _addresses,
                 _noteHashes,
                 [_intValues[1], _intValues[0], _intValues[5], _intValues[4]],
-                lendProof, lendSign,
-                collateralProof, collateralSign
+                lendProof, lendSign, lendProofOutput,
+                collateralProof, collateralSign, collateralProofOutput
             );
 
             // transfer relayerFeeLST from kernel creator to relayer
@@ -369,7 +378,7 @@ contract ZkLoan {
             //     );
             //     require(token_transfer);
             // }
-            return true;
+            // return true;
     }
 
     function cancel_kernel(

@@ -5,7 +5,7 @@ import "./AZTEC/ERC1724/ZkAsset.sol";
 contract ZkERC20 is ZkAsset{
 
     event Log(address owner, uint256 value, bytes32 noteHash);
-    event LogString(string value);
+    // event LogString(string value);
 
     address public aceAddress;
     address public erc20Address;
