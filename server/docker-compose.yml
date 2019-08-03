@@ -1,0 +1,52 @@
+version: "3.6"
+networks:
+  db_nw:
+    external: true
+    name: db_nw
+services:
+  memcached:
+    image: "memcached:latest"
+    hostname: "memcached"
+    networks:
+      - db_nw
+    ports:
+      - 11211:11211
+  couchbase:
+    image: couchbase
+    hostname: "couchbase"
+    networks:
+      - db_nw
+    ports:
+      - 8091-8094:8091-8094
+    volumes:
+      - /home/akash/couchbase:/opt/couchbase/var
+    environment:
+      - COUCHBASE_ADMIN_USER=${COUCHBASE_ADMIN_USER}
+      - COUCHBASE_ADMIN_PWD=${COUCHBASE_ADMIN_PWD}
+      - COUCHBASE_FTS_MEMORY_QUOTA=${COUCHBASE_FTS_MEMORY_QUOTA}
+      - COUCHBASE_MEMORY_QUOTA=${COUCHBASE_MEMORY_QUOTA}
+      - COUCHBASE_INDEX_MEMORY_QUOTA=${COUCHBASE_INDEX_MEMORY_QUOTA}
+      - COUCHBASE_SERVICES=${COUCHBASE_SERVICES}
+      - COUCHBASE_BUCKETS=${COUCHBASE_BUCKETS}
+      - COUCHBASE_FTS_PREFIX=${COUCHBASE_FTS_PREFIX}
+      - COUCHBASE_BUCKET_RAM_SIZE=${COUCHBASE_BUCKET_RAM_SIZE}
+  fast_api:
+    hostname: "web"
+    networks:
+      - db_nw
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - "/home/akash/Music/intern/fast_api:/fast_api"
+
+    ports:
+      - 8000:8000
+
+  test:
+    hostname: "test"
+    networks:
+      - db_nw
+    build:
+      context: ./
+      dockerfile: Dockerfile
