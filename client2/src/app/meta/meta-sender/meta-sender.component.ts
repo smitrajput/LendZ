@@ -33,13 +33,28 @@ var network_config = {
     ETHERSCAN_TX: "https://etherscan.io/tx/"
 }
 
+let tokenAddresses = {
+    "DAI": "a",
+    "DGX": "b",
+    "WETH": "c",
+    "USDC": "d",
+    "LST": "e"
+}
+
+let loanPeriodInSeconds = {
+    "1 MONTH": 2592000,
+    "3 MONTH": 7776000,
+    "6 MONTH": 15552000
+}
+
+
 const ONE_SECOND_MS = 1000;
 const ONE_MINUTE_MS = ONE_SECOND_MS * 60;
 const TEN_MINUTES_MS = ONE_MINUTE_MS * 10;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 const DECIMALS = 18;
-const COLLATERAL_TOKENS = ["DAI", "DGX", "WETH"];
-const LENDING_TOKENS = ["DAI", "USDC", "LST"];
+const COLLATERAL_TOKENS = ["DAI", "USDC", "WETH"];
+const LENDING_TOKENS = ["DAI", "WETH", "LST"];
 const LOAN_PERIOD = ["1 MONTH", "3 MONTH", "6 MONTH"];
 
 declare let require: any;
@@ -130,7 +145,7 @@ export class MetaSenderComponent implements OnInit {
     accounts: string[];
     assets: any;
     lendOrders = LOAN_DATA;
-    columnsToDisplay = ['loan_id', 'Lending TZkLoanServiceZkLoanServiceoken', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
+    columnsToDisplay = ['loan_id', 'Lending Token', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
     // expandedElement: PeriodicElement | null;
 
     model = {
@@ -311,16 +326,47 @@ export class MetaSenderComponent implements OnInit {
 
     async placeOrder() {
 
-        var order = {
-            loan_amount: this.model.loan_amount,
-            lending_token: this.model.lending_token,
-            collateral_token: this.model.collateral_token,
-            order_expiry: this.model.order_expiry,
-            daily_interest_rate: this.model.daily_interest_rate,
-            monitoring_fee: this.model.monitoring_fee,
-            loan_period: this.model.loan_period
+        var body = {
+            "lender" :this.model.account,
+            "borrower": "0x0000000000000000000000000000000000000000",
+            "relayer": "0x0000000000000000000000000000000000000000",
+            "wrangler": "0x0000000000000000000000000000000000000000",
+            "borrow_currency_symbol": this.model.collateral_token,
+            "lend_curency_symbol": this.model.lending_token,
+            "borrow_currency_address": tokenAddresses[this.model.collateral_token],
+            "lend_currency_address":tokenAddresses[this.model.lending_token],
+            "expires_at":this.model.order_expiry,
+            "daily_interest_rate":this.model.daily_interest_rate,
+            "monitoring_fee":this.model.monitoring_fee,
+            "position_duration_month": this.model.loan_period,
+            "position_duration":loanPeriodInSeconds[this.model.loan_period],
+            "loan_amount": parseInt(this.model.loan_amount),
+            "collateral_amount": parseInt(this.model.loan_amount) * this.getRate(this.model.lending_token, this.model.collateral_token)
         }
-        console.log("placing order : ", order);
+        console.log("placing order : ", body);
+
+        const status = <Boolean>await this.zkLoanService.createKernel(body);
+            // this.model.account, 
+            // tokenAddresses[this.model.collateral_token], 
+            // tokenAddresses[this.model.lending_token],
+            // this.model.monitoring_fee,
+            // "0x7bf20bc9c53493cfd19f9378b1bb9f36ceeee7e76b724efeca38f7d1c96f8a04", //salt
+            // this.model.order_expiry,
+            // this.model.daily_interest_rate,
+            // loanPeriodInSeconds[this.model.loan_period]
+        
+
+
+        // })
+
+
+    }
+
+    getRate(lendToken, collateralToken){
+        if(lendToken === "DAI" && collateralToken === "WETH") return 0.0018;
+        if(lendToken === "DAI" && collateralToken === "DGX") return 0.0216;
+        if(lendToken === "USDC" && collateralToken === "WETH") return 0.01;
+        if(lendToken === "USDC" && collateralToken === "DAI") return 1.01;
     }
 
 
