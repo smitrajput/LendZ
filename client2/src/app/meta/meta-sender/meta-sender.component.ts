@@ -3,6 +3,7 @@ import { Web3Service } from '../../util/web3.service';
 import { MatSnackBar } from '@angular/material';
 import { BaseContract } from '@0x/base-contract';
 import { HttpClient } from '@angular/common/http';
+import { ZkLoanService } from "zk-loan.service";
 // import {Component} from '@angular/core';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 
@@ -68,7 +69,7 @@ const VIEW_REQUESTS = {
 }
 
   const LOAN_DATA = [
-    {   "loan_id":"112132",
+    {   "Loan Hash":"112132",
         "Lending Token": "DAI",
         "Collateral Token": "ETH",
         "Daily Interest Rate": 5.00,
@@ -81,7 +82,7 @@ const VIEW_REQUESTS = {
     //       atomic weight of 1.008, hydrogen is the lightest element on the periodic table.`
     },
     {   
-        "loan_id":"112133",
+        "Loan Hash":"112133",
         "Lending Token": "DAI",
         "Collateral Token": "WETH",
         "Daily Interest Rate": 15.00,
@@ -92,7 +93,7 @@ const VIEW_REQUESTS = {
         "View Request Status":true
     }, 
     {   
-        "loan_id":"112134",
+        "Loan Hash":"112134",
         "Lending Token": "DAI",
         "Collateral Token": "WETH",
         "Daily Interest Rate": 10.00,
@@ -120,8 +121,8 @@ export class MetaSenderComponent implements OnInit {
     accounts: string[];
     assets: any;
     lendOrders = LOAN_DATA;
-    columnsToDisplay = ['loan_id', 'Lending Token', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
-    expandedElement: PeriodicElement | null;
+    columnsToDisplay = ['loan_id', 'Lending TZkLoanServiceZkLoanServiceoken', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
+    // expandedElement: PeriodicElement | null;
 
     model = {
         amount: 5,
@@ -146,7 +147,7 @@ export class MetaSenderComponent implements OnInit {
         loan_period_list:LOAN_PERIOD
     };
 
-    constructor(private web3Service: Web3Service, private matSnackBar: MatSnackBar, private http: HttpClient) {
+    constructor(private web3Service: Web3Service, private matSnackBar: MatSnackBar, private http: HttpClient, private zkLoanService: ZkLoanService) {
         console.log('Constructor: ' + web3Service);
     }
 
@@ -188,7 +189,7 @@ export class MetaSenderComponent implements OnInit {
             console.log(this.web3Service.getProvider());
             [maker, taker] = await web3Wrapper.getAvailableAddressesAsync();
             taker = maker;
-            console.log("accounts using web3 provider engine ");
+            console.log("accounts using web3 provider engine");
             console.log(maker + " : " + taker);
         })();
 
@@ -278,16 +279,21 @@ export class MetaSenderComponent implements OnInit {
     }
 
 
-    async requestViewAccess() {
+    async requestViewAccess(loanHash: string, address: string) {
 
         console.log("Sending View Request .....");
         this.setStatus("Sending View Request to the Lender ....");
+        const status = <Boolean>await this.zkLoanService.requestViewAccess(loanHash, address);
+        console.log(status);
+
     }
 
-    async grantViewAccess() {
+    async grantViewAccess(loanHash: string, address: string) {
 
         console.log("Granting View Access .....");
         this.setStatus("Granting View Access to the borrower ....");
+        const status = <Boolean>await this.zkLoanService.grantViewAccess(loanHash, address);
+        console.log(status);
     }
 
     async updateWethBalance() {

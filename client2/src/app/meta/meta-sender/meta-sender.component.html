@@ -74,7 +74,7 @@
             <span class="loan-meta-data" > Loan Amount : </span>
           <span class="loan-meta-data" *ngIf="element['View Request Status']"> {{element["Loan Amount"]}} </span>
           <span class="loan-meta-data" *ngIf="!element['View Request Status']">
-           <button mat-button color="accent" id="requestViewAccess" (click)="requestViewAccess()">Request View Access</button>
+           <button mat-button color="accent" id="requestViewAccess" (click)="requestViewAccess(element['Loan Hash'], model.account)">Request View Access</button>
           </span>
           
         </div>
@@ -141,9 +141,9 @@
             </div>
             <p class="loan-meta-data" >  View Access Requests :  </p>
             <div>
-                <span  *ngFor="let request of model.viewRequests[element['loan_id']]">
+                <span  *ngFor="let request of model.viewRequests[element['Loan Hash']]">
                   <span class="loan-meta-data"> {{request.address}} </span>  
-                  <button mat-button color="accent" id="grantViewAccess" (click)="grantViewAccess()">Grant View Access</button>
+                  <button mat-button color="accent" id="grantViewAccess" (click)="grantViewAccess(element['Loan Hash'], request.address)">Grant View Access</button>
                   <br />
                   <br />
                 </span>
