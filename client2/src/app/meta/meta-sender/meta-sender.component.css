@@ -7,6 +7,27 @@
     background-color: cornflowerblue;
 }
 
+.span {
+  margin: auto;
+  font-size: 125%;
+}
+
+.adddress {
+  margin: auto;
+  text-align: center;
+  font-size: 150%;
+  /* font-weight: bold; */
+}
+
+.mat-button {
+  background-color:rgb(34, 31, 243);
+  color: white;
+}
+
+p {
+  font-size: 125%;
+}
+
 table {
   width: 100%;
 }

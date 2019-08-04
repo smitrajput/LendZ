@@ -19,6 +19,10 @@ import { SignerSubprovider, RPCSubprovider, Web3ProviderEngine } from '@0x/subpr
 import { symbol } from 'prop-types';
 var Web3Wrapper = require("@0x/web3-wrapper").Web3Wrapper;
 var http = require('@0x/connect').HttpClient;
+var ENS = require('ethereum-ens');
+
+// var accounts;
+var ens;
 
 
 var network_config = {
@@ -50,6 +54,9 @@ var providerEngine, web3Wrapper, contractWrappers;
 var takerAssetAmount, signedOrder;
 var exchange, weth, zrx;
 var taker, maker;
+
+declare let window: any;
+
 
 // this map stores all the tokens, with their symbol as the key, and address and decimals as values as a object
 let tokens = new Map();
@@ -119,6 +126,7 @@ const LOAN_DATA = [
     ],
 })
 export class MetaSenderComponent implements OnInit {
+    private web3: any;
     accounts: string[];
     assets: any;
     lendOrders = LOAN_DATA;
@@ -150,6 +158,33 @@ export class MetaSenderComponent implements OnInit {
 
     constructor(private web3Service: Web3Service, private matSnackBar: MatSnackBar, private http: HttpClient, private zkLoanService: ZkLoanService) {
         console.log('Constructor: ' + web3Service);
+        window.addEventListener('load', async () => {
+            // Modern dapp browsers...
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                try {
+                    // Request account access if needed
+                    await window.ethereum.enable();
+                    // Acccounts now exposed
+                    console.log("inside window ethereum");
+                    console.log(window.web3);
+                    // this.web3.eth.sendTransaction({/* ... */ });
+                } catch (error) {
+                    // User denied account access...
+                    console.log('Cannot send the transaction')
+                }
+            }
+            // Legacy dapp browsers...
+            else if (window.web3) {
+                window.web3 = new Web3(this.web3.currentProvider);
+                // Acccounts always exposed
+                this.web3.eth.sendTransaction({/* ... */ });
+            }
+            // Non-dapp browsers...
+            else {
+                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+            }
+        });
     }
 
     ngOnInit(): void {
@@ -189,6 +224,14 @@ export class MetaSenderComponent implements OnInit {
             const web3Wrapper = new Web3Wrapper(providerEngine);
             console.log(this.web3Service.getProvider());
             [maker, taker] = await web3Wrapper.getAvailableAddressesAsync();
+            this.model.account = maker;
+            ens = new ENS(window.ethereum);
+            console.log('ENS', await ens.resolver('tezan.deserves.eth').addr())
+            var name = await ens.reverse(maker).name()
+            if (maker != await ens.resolver(name).addr()) {
+                name = null;
+            }
+            console.log('REVERSE', name)
             taker = maker;
             console.log("accounts using web3 provider engine");
             console.log(maker + " : " + taker);
@@ -200,11 +243,12 @@ export class MetaSenderComponent implements OnInit {
 
     }
 
-    watchAccount() {
+    async watchAccount() {
         this.web3Service.accountsObservable.subscribe((accounts) => {
             this.accounts = accounts;
             this.model.account = accounts[0];
             this.refreshBalance();
+            console.log("Hie", this.model.account)
         });
     }
 

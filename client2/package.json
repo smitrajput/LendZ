@@ -36,6 +36,7 @@
         "core-js": "^2.5.7",
         "dotenv": "^8.0.0",
         "eth-crypto": "^1.4.0",
+        "ethereum-ens": "^0.7.7",
         "ethers": "^4.0.20",
         "rxjs": "^6.3.3",
         "truffle-contract": "^4.0.1",
