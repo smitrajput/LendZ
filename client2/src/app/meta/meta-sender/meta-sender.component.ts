@@ -3,8 +3,9 @@ import { Web3Service } from '../../util/web3.service';
 import { MatSnackBar } from '@angular/material';
 import { BaseContract } from '@0x/base-contract';
 import { HttpClient } from '@angular/common/http';
+import { ZkLoanService } from "../../zk-loan.service";
 // import {Component} from '@angular/core';
-import {animate, state, style, transition, trigger} from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
 
 var Web3 = require("web3");
@@ -59,50 +60,51 @@ function getRandomFutureDateInSeconds() {
 }
 
 const VIEW_REQUESTS = {
-    "112132":[
-        {"address":"0x123121321", "public_key":"1231dfdffdf"},
-        {"address":"0x123767661", "public_key":"1231dfasdfasdfasdff"}
+    "112132": [
+        { "address": "0x123121321", "public_key": "1231dfdffdf" },
+        { "address": "0x123767661", "public_key": "1231dfasdfasdfasdff" }
     ],
-    "112133":[],
-    "112134":[{"address":"0x123121321", "public_key":"1231dfdffdf"}]
+    "112133": [],
+    "112134": [{ "address": "0x123121321", "public_key": "1231dfdffdf" }]
 }
 
-  const LOAN_DATA = [
-    {   "loan_id":"112132",
+const LOAN_DATA = [
+    {
+        "Loan Hash": "112132",
         "Lending Token": "DAI",
         "Collateral Token": "ETH",
         "Daily Interest Rate": 5.00,
         "Loan Period": LOAN_PERIOD[1],
-        "Order Expiry":"12",
-        "Monitoring Fee":1.00,
-        "Loan Amount":500.0,
-        "View Request Status":false
-    //   description: `Hydrogen is a chemical element with symbol H and atomic number 1. With a standard
-    //       atomic weight of 1.008, hydrogen is the lightest element on the periodic table.`
+        "Order Expiry": "12",
+        "Monitoring Fee": 1.00,
+        "Loan Amount": 500.0,
+        "View Request Status": false
+        //   description: `Hydrogen is a chemical element with symbol H and atomic number 1. With a standard
+        //       atomic weight of 1.008, hydrogen is the lightest element on the periodic table.`
     },
-    {   
-        "loan_id":"112133",
+    {
+        "Loan Hash": "112133",
         "Lending Token": "DAI",
         "Collateral Token": "WETH",
         "Daily Interest Rate": 15.00,
         "Loan Period": LOAN_PERIOD[2],
-        "Order Expiry":"12",
-        "Monitoring Fee":1.00,
-        "Loan Amount":400.0,
-        "View Request Status":true
-    }, 
-    {   
-        "loan_id":"112134",
+        "Order Expiry": "12",
+        "Monitoring Fee": 1.00,
+        "Loan Amount": 400.0,
+        "View Request Status": true
+    },
+    {
+        "Loan Hash": "112134",
         "Lending Token": "DAI",
         "Collateral Token": "WETH",
         "Daily Interest Rate": 10.00,
         "Loan Period": LOAN_PERIOD[0],
-        "Order Expiry":"12",
-        "Monitoring Fee":1.00,
-        "Loan Amount":8000.0,
-        "View Request Status":false
+        "Order Expiry": "12",
+        "Monitoring Fee": 1.00,
+        "Loan Amount": 8000.0,
+        "View Request Status": false
     },
-  ];  
+];
 
 @Component({
     selector: 'app-meta-sender',
@@ -110,18 +112,18 @@ const VIEW_REQUESTS = {
     styleUrls: ['./meta-sender.component.css'],
     animations: [
         trigger('detailExpand', [
-          state('collapsed', style({height: '0px', minHeight: '0'})),
-          state('expanded', style({height: '*'})),
-          transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+            state('collapsed', style({ height: '0px', minHeight: '0' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ]),
-      ],
+    ],
 })
 export class MetaSenderComponent implements OnInit {
     accounts: string[];
     assets: any;
     lendOrders = LOAN_DATA;
-    columnsToDisplay = ['loan_id', 'Lending Token', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
-    expandedElement: PeriodicElement | null;
+    columnsToDisplay = ['loan_id', 'Lending TZkLoanServiceZkLoanServiceoken', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
+    // expandedElement: PeriodicElement | null;
 
     model = {
         amount: 5,
@@ -133,20 +135,20 @@ export class MetaSenderComponent implements OnInit {
         orders: '',
         tokens: tokens,
         weth_amount: '',
-        collateral_token:'',
-        lending_token:'',
-        daily_interest_rate:0,
-        loan_period:'',
-        loan_amount:'',
-        order_expiry:'',
-        viewRequests:VIEW_REQUESTS,
-        monitoring_fee:'',
-        collateral_token_list:COLLATERAL_TOKENS,
-        lending_token_list:LENDING_TOKENS,
-        loan_period_list:LOAN_PERIOD
+        collateral_token: '',
+        lending_token: '',
+        daily_interest_rate: 0,
+        loan_period: '',
+        loan_amount: '',
+        order_expiry: '',
+        viewRequests: VIEW_REQUESTS,
+        monitoring_fee: '',
+        collateral_token_list: COLLATERAL_TOKENS,
+        lending_token_list: LENDING_TOKENS,
+        loan_period_list: LOAN_PERIOD
     };
 
-    constructor(private web3Service: Web3Service, private matSnackBar: MatSnackBar, private http: HttpClient) {
+    constructor(private web3Service: Web3Service, private matSnackBar: MatSnackBar, private http: HttpClient, private zkLoanService: ZkLoanService) {
         console.log('Constructor: ' + web3Service);
     }
 
@@ -188,7 +190,7 @@ export class MetaSenderComponent implements OnInit {
             console.log(this.web3Service.getProvider());
             [maker, taker] = await web3Wrapper.getAvailableAddressesAsync();
             taker = maker;
-            console.log("accounts using web3 provider engine ");
+            console.log("accounts using web3 provider engine");
             console.log(maker + " : " + taker);
         })();
 
@@ -266,28 +268,33 @@ export class MetaSenderComponent implements OnInit {
     async placeOrder() {
 
         var order = {
-            loan_amount:this.model.loan_amount,
-            lending_token:this.model.lending_token,
-            collateral_token:this.model.collateral_token,
-            order_expiry:this.model.order_expiry,
-            daily_interest_rate:this.model.daily_interest_rate,
-            monitoring_fee:this.model.monitoring_fee,
-            loan_period:this.model.loan_period            
+            loan_amount: this.model.loan_amount,
+            lending_token: this.model.lending_token,
+            collateral_token: this.model.collateral_token,
+            order_expiry: this.model.order_expiry,
+            daily_interest_rate: this.model.daily_interest_rate,
+            monitoring_fee: this.model.monitoring_fee,
+            loan_period: this.model.loan_period
         }
         console.log("placing order : ", order);
     }
 
 
-    async requestViewAccess() {
+    async requestViewAccess(loanHash: string, address: string) {
 
         console.log("Sending View Request .....");
         this.setStatus("Sending View Request to the Lender ....");
+        const status = <Boolean>await this.zkLoanService.requestViewAccess(loanHash, address);
+        console.log(status);
+
     }
 
-    async grantViewAccess() {
+    async grantViewAccess(loanHash: string, address: string) {
 
         console.log("Granting View Access .....");
         this.setStatus("Granting View Access to the borrower ....");
+        const status = <Boolean>await this.zkLoanService.grantViewAccess(loanHash, address);
+        console.log(status);
     }
 
     async updateWethBalance() {
