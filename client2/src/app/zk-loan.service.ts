@@ -32,17 +32,17 @@ export class ZkLoanService {
     this.kernelContract = await this.web3Service.artifactsToContract(kernel);
     this.deployedKernelContract = await this.kernelContract.deployed();
 
-    let DAIContract = await this.web3Service.artifactsToContract(dai);
-    this.deployedDAIContract = await dai.deployed();
+    // let DAIContract = await this.web3Service.artifactsToContract(dai);
+    // this.deployedDAIContract = await dai.deployed();
 
-    let WETHContract = await this.web3Service.artifactsToContract(weth);
-    this.deployedWETHContract = await weth.deployed();
+    // let WETHContract = await this.web3Service.artifactsToContract(weth);
+    // this.deployedWETHContract = await weth.deployed();
 
-    let joinsplitContract = await this.web3Service.artifactsToContract(joinsplit);
-    this.deployedJoinSplitContract = await joinsplitContract.deployed();
+    // let joinsplitContract = await this.web3Service.artifactsToContract(joinsplit);
+    // this.deployedJoinSplitContract = await joinsplitContract.deployed();
 
-    let aceContract = await this.web3Service.artifactsToContract(ace);
-    this.deployedACEContract = await aceContract.deployed();
+    // let aceContract = await this.web3Service.artifactsToContract(ace);
+    // this.deployedACEContract = await aceContract.deployed();
 
   }
 

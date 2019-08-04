@@ -101,8 +101,8 @@ contract('ZkLoan', (accounts) => {
         await ZkLoanInstance.set_wrangler_status(wrangler.address, true);
 
 
-        let lendCurrencyNote = aztec.note.create(lender.publicKey, 100);
-        let borrowCurrencyNote = aztec.note.create(dummyPublicKey, 50);
+        let lendCurrencyNote = await aztec.note.create(lender.publicKey, 100);
+        let borrowCurrencyNote = await aztec.note.create(dummyPublicKey, 50);
 
         let monitoringFee = 1;
         let expires_at = parseInt(Date.now()/1000) + 1000000;
@@ -227,7 +227,7 @@ contract('ZkLoan', (accounts) => {
         await ZkLoanInstance.set_wrangler_status(wrangler.address, true);
 
         // Approve ZkLoan contrcat to spend the protocol token (ie, LST)
-        
+        await protocolTokenInstance.approve(ZkLoanInstance.address, 1, {from: lender.address})
 
         // Proofs for converting ERC20 tokens to AZTEC notes
 
@@ -299,18 +299,48 @@ contract('ZkLoan', (accounts) => {
             collateralData, collateralSignature, collateralProofOutputs,
             {from: accounts[2]}
         );
+        // print(tx);
         assert.equal(tx.receipt.status, true);
 
         // After some time, repay the loan
         await ERC20_AInstance.transfer(borrower.address, 105); // Assue somehow that borrower gets the money to repay the loan
 
-        let depositInputNotes2 = [];
-        let depositOutputNotes2 = [await aztec.note.create(borrower.publicKey, 50)];
-        let depositPublicValue2 = -50;
-        let depositInputOwnerAccounts2 = []
+        let depositInputNotes3 = [];
+        let depositOutputNotes3 = [await aztec.note.create(borrower.publicKey, 105)];
+        let depositPublicValue3 = -105;
+        let depositInputOwnerAccounts3 = []
 
-        const depositProof2 = new aztec.JoinSplitProof(depositInputNotes2, depositOutputNotes2, borrower.address, depositPublicValue2, borrower.address);
-        const depositData2 = depositProof2.encodeABI(zkERC20_BInstance.address);
-        const depositSignatures2 = depositProof2.constructSignatures(zkERC20_BInstance.address, depositInputOwnerAccounts2);
+        const depositProof3 = new aztec.JoinSplitProof(depositInputNotes3, depositOutputNotes3, borrower.address, depositPublicValue3, borrower.address);
+        const depositData3 = depositProof2.encodeABI(zkERC20_AInstance.address);
+        const depositSignatures3 = depositProof2.constructSignatures(zkERC20_AInstance.address, depositInputOwnerAccounts3);
+
+        await ERC20_AInstance.approve(ACEInstance.address, -depositPublicValue3, {from: borrower.address})
+
+        await ACEInstance.publicApprove(zkERC20_AInstance.address, depositProof3.hash, -depositPublicValue3, { from: borrower.address });
+        tx = await zkERC20_AInstance.confidentialTransfer(depositData3, depositSignatures3, { from: borrower.address });
+        assert.equal(tx.receipt.status, true);
+        let positionAddress = tx.receipt.logs[0].args["_position"];
+        
+        // Notes for repayment & collateral return
+        lendCurrencyNote = depositOutputNotes3[0];
+        borrowCurrencyNote = borrowCurrencyNoteTransferred;
+        lendCurrencyOwedNote = await aztec.note.create(lender.publicKey, 105);
+
+        // let lendCurrencyNoteTransferred = await aztec.note.create(borrower.publicKey, 100);
+        borrowCurrencyNoteTransferred = await aztec.note.create(borrower.publicKey, 50);
+
+        //create proofs for repayment & collateral return
+        const repayProof = new aztec.JoinSplitProof([lendCurrencyNote], [lendCurrencyNoteTransferred], ZkLoanInstance.address, 0, borrower.address);
+        const repayData = repayProof.encodeABI(zkERC20_AInstance.address);
+        const repaySignature = signNote(zkERC20_AInstance.address, lendCurrencyNote.noteHash, ZkLoanInstance.address, borrower.privateKey);
+        const repayProofOutputs = repayProof.eth.output;
+
+        const collateralReturnProof = new aztec.JoinSplitProof([borrowCurrencyNote], [borrowCurrencyNoteTransferred], ZkLoanInstance.address, 0, ZkLoanInstance.address);
+        const collateralReturnData = collateralReturnProof.encodeABI(zkERC20_BInstance.address);
+        // const collateralReturnSignature = signNote(zkERC20_BInstance.address, borrowCurrencyNote.noteHash, ZkLoanInstance.address, borrower.privateKey);
+        const collateralReturnProofOutputs = collateralReturnProof.eth.output;
+
+        tx = await ZkLoanInstance.close_position(positionAddress, repayData, repaySignature, repayProofOutputs, collateralReturnData, collateralReturnProofOutputs);
+        assert.equal(tx.receipt.status, true);
     })
 })
