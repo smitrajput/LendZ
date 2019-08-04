@@ -32,6 +32,7 @@
         "@aztec/dev-utils": "0.12.2",
         "@aztec/protocol": "0.9.1",
         "@aztec/secp256k1": "1.0.1",
+        "aztec": "^0.3.9",
         "aztec.js": "0.11.0",
         "core-js": "^2.5.7",
         "dotenv": "^8.0.0",
