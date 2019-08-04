@@ -1,0 +1,6 @@
+{
+  "env": {
+    "ATLAS_PW": "narutominato",
+    "JWT_KEY": "secret"
+  }
+}
