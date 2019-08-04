@@ -18,7 +18,7 @@
  *
  */
 
-// const HDWalletProvider = require('truffle-hdwallet-provider');
+const HDWalletProvider = require('truffle-hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 //
 // const fs = require('fs');
@@ -46,6 +46,16 @@ module.exports = {
      host: "127.0.0.1",     // Localhost (default: none)
      port: 8545,            // Standard Ethereum port (default: none)
      network_id: "*",       // Any network (default: none)
+    },
+
+    matic: {
+      provider: function() {
+        return new HDWalletProvider("differ idle retire demise glare sentence glove hammer iron mango way empty", `https://testnet2.matic.network`)
+      },
+      network_id: 8995,
+      gas: 0,
+      gasPrice: 0,
+      skipDryRun: true
     },
 
     // Another network with more advanced options...

@@ -20,6 +20,7 @@
     "aztec.js": "0.11.0",
     "dotenv": "^8.0.0",
     "ethereum-ens": "^0.7.7",
+    "truffle-hdwallet-provider": "^1.0.15",
     "web3": "1.0.0-beta.34"
   },
   "keywords": [
