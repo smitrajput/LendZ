@@ -31,6 +31,35 @@ router.get("/", (req, res, next) => {
     });
 });
 
+
+router.get("/lender/:lender/", (req, res, next) => {
+    var lender = req.params.lender;
+
+    Kernel.find({lender:lender}, {"__v":0})
+      // .select("name _id price")
+      .exec()
+      .then(docs => {
+        console.log("From the database ", docs);
+        const response = {
+          result: docs
+        };
+        if (docs) {
+          res.status(200).json(response);
+        } else {
+          res.status(404).json({
+            message: "No entries found"
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json({
+          error: err
+        });
+      });
+  });
+
+  
 router.post("/", (req, res, next) => {
  
   console.log(req.body);

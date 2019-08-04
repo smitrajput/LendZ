@@ -122,7 +122,7 @@ export class MetaSenderComponent implements OnInit {
     accounts: string[];
     assets: any;
     lendOrders = LOAN_DATA;
-    columnsToDisplay = ['loan_id', 'Lending TZkLoanServiceZkLoanServiceoken', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
+    columnsToDisplay = ['loan_id', 'Lending Token', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
     // expandedElement: PeriodicElement | null;
 
     model = {
