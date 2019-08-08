@@ -1,5 +1,5 @@
 <h1 align="center">zkLoans</h1>
-<p><h3 align="center">Confidential loans (zero-knowledge Loans) on Lendroid using the Aztec protocol [LendZ @ETHIndia2.0].</h3></p>
+<p><h3 align="center">Confidential (zero-knowledge) loans on the Ethereum blockchain using Lendroid and the Aztec protocol [LendZ @ETHIndia2.0].</h3></p>
 
 
 ### Problem it solves
