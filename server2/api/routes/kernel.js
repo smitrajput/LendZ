@@ -12,8 +12,7 @@ router.get("/", (req, res, next) => {
     .then(docs => {
       console.log("From the database ", docs);
       const response = {
-        count: docs.length,
-        kernels: docs
+        result: docs
       };
       if (docs) {
         res.status(200).json(response);
@@ -34,7 +33,7 @@ router.get("/", (req, res, next) => {
 
 router.get("/lender/:lender/", (req, res, next) => {
     var lender = req.params.lender;
-
+    console.log("lender on server ", lender);
     Kernel.find({lender:lender}, {"__v":0})
       // .select("name _id price")
       .exec()
@@ -106,6 +105,22 @@ router.get("/:kernelHash", (req, res, next) => {
           message: "No entry found for the provided kernel hash"
         });
       }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
+      });
+    });
+});
+
+router.delete("/delete", (req, res, next) => {
+  // const kernel_hash = req.params.kernelHash;
+  Kernel.remove({})
+    .exec()
+    .then(result => {
+      console.log(result);
+      res.status(200).json(result);
     })
     .catch(err => {
       console.log(err);

@@ -1,50 +1,65 @@
+<!-- <mat-card>
+  <mat-card-content>
+    <div>
+      <span *ngIf="model.account !== ''" class="span"><i>Ethereum Address: {{model.account}}</i></span>
+    </div>
+  </mat-card-content>
+</mat-card> -->
 
 
 <mat-card>
-    <mat-card-header>PLACE LEND ORDER  </mat-card-header>
-    <mat-card-content>
+  <mat-card-content>
+    <div class="adddress">
+      <span *ngIf="model.account !== ''">Ethereum Address: <i>{{model.account}}</i></span>
+    </div>
+  </mat-card-content>
+  <mat-card-header><span class="span">PLACE LEND ORDER</span></mat-card-header>
+  <mat-card-content>
 
     <br />
 
     <br />
     <p>Select token for collateral</p>
-    
+
     <mat-select name="collateral_token" (selectionChange)="setCollateralToken($event)" placeholder="Collateral Token">
-			<mat-option *ngFor="let token of model.collateral_token_list" [value]="token">{{token}}</mat-option>
-	</mat-select>
+      <mat-option *ngFor="let token of model.collateral_token_list" [value]="token">{{token}}</mat-option>
+    </mat-select>
     <br />
     <br />
     <p>Select token for lending</p>
     <mat-select name="loan_token" (selectionChange)="setLendingToken($event)" placeholder="Lending Token">
-			<mat-option *ngFor="let token of model.lending_token_list" [value]="token">{{token}}</mat-option>
-	</mat-select>
+      <mat-option *ngFor="let token of model.lending_token_list" [value]="token">{{token}}</mat-option>
+    </mat-select>
     <br />
     <br />
     <p>Select Loan Period</p>
     <mat-select name="loan_period" (selectionChange)="setLoanPeriod($event)" placeholder="Loan Period">
-			<mat-option *ngFor="let period of model.loan_period_list" [value]="period">{{period}}</mat-option>
-	</mat-select>
+      <mat-option *ngFor="let period of model.loan_period_list" [value]="period">{{period}}</mat-option>
+    </mat-select>
     <br />
     <br />
     <mat-form-field>
-        <input type="text" matInput id="loan_amount" placeholder="LOAN AMOUNT" (change)="setLoanAmount($event)">
+      <input type="text" matInput id="loan_amount" placeholder="LOAN AMOUNT" (change)="setLoanAmount($event)">
     </mat-form-field>
-    <span>                       </span>
+    <span> </span>
     <mat-form-field>
-        <input type="text" matInput id="daily_interest_rate" placeholder="DAILY INTEREST RATE" (change)="setDailyInterestRate($event)">
+      <input type="text" matInput id="daily_interest_rate" placeholder="DAILY INTEREST RATE"
+        (change)="setDailyInterestRate($event)">
     </mat-form-field>
     <br />
     <mat-form-field>
-        <input type="text" matInput id="order_expiry" placeholder="ORDER EXPIRY (IN HOURS)" (change)="setOrderExpiry($event)">
+      <input type="text" matInput id="order_expiry" placeholder="ORDER EXPIRY (IN HOURS)"
+        (change)="setOrderExpiry($event)">
     </mat-form-field>
-    <span>                    </span>
+    <span> </span>
     <mat-form-field>
-        <input type="text" matInput id="monitoring_fee" placeholder="MONITORING FEE (IN LST)" (change)="setMonitoringFee($event)">
+      <input type="text" matInput id="monitoring_fee" placeholder="MONITORING FEE (IN LST)"
+        (change)="setMonitoringFee($event)">
     </mat-form-field>
     <br />
     <br />
-        <button mat-button color="accent" id="placeOrder" (click)="placeOrder()">Place Order</button>
-    </mat-card-content>
+    <button mat-button color="blue" id="placeOrder" (click)="placeOrder()">Place Order</button>
+  </mat-card-content>
 </mat-card>
 
 <br /><br /><br />
@@ -52,58 +67,57 @@
 
 
 <mat-card>
-    <mat-card-header>AVAILABLE LEND ORDERS  </mat-card-header>
-    <br />
-    <mat-card-content>
-        <table mat-table
-       [dataSource]="lendOrders" multiTemplateDataRows
-       class="mat-elevation-z8">
-  <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
-    <th mat-header-cell *matHeaderCellDef> {{column}} </th>
-    <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
-  </ng-container>
+  <mat-card-header><span class="span">AVAILABLE LEND ORDERS</span></mat-card-header>
+  <br />
+  <button mat-button color="accent" id="requestViewAccess"
+                    (click)="getOrders()">Refresh</button>
+  <mat-card-content>
+    <table mat-table [dataSource]="lendOrders" multiTemplateDataRows class="mat-elevation-z8">
+      <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+        <th mat-header-cell *matHeaderCellDef> {{column}} </th>
+        <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+      </ng-container>
 
-  <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
-  <ng-container matColumnDef="expandedDetail">
-    <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length">
-      <div class="example-element-detail"
-           [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-        <div >
-        <br />
-        <div>
-            <span class="loan-meta-data" > Loan Amount : </span>
-          <span class="loan-meta-data" *ngIf="element['View Request Status']"> {{element["Loan Amount"]}} </span>
-          <span class="loan-meta-data" *ngIf="!element['View Request Status']">
-           <button mat-button color="accent" id="requestViewAccess" (click)="requestViewAccess(element['Loan Hash'], model.account)">Request View Access</button>
-          </span>
-          
-        </div>
-        <br />
-        <div>
-            <span class="loan-meta-data" > Order Expiry : {{element["Order Expiry"]}} </span>
-          <span class="loan-meta-data" > Monitoring Fee (in LST) : {{element["Monitoring Fee"]}} </span>
+      <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+      <ng-container matColumnDef="expandedDetail">
+        <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length">
+          <div class="example-element-detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+            <div>
+              <br />
+              <div>
+                <span class="loan-meta-data"> Loan Amount : </span>
+                <span class="loan-meta-data" *ngIf="element['View Request Status']"> {{element["loan_amount"]}} </span>
+                <span class="loan-meta-data" *ngIf="!element['View Request Status']">
+                  <button mat-button color="accent" id="requestViewAccess"
+                    (click)="requestViewAccess(element['hash'], model.account)">Request View Access</button>
+                </span>
+
+              </div>
+              <br />
+              <div>
+                <span class="loan-meta-data"> Order Expiry : {{element["expires_at"]}} </span>
+                <span class="loan-meta-data"> Monitoring Fee (in LST) : {{element["monitoring_fee"]}} </span>
+                <br />
+              </div>
+            </div>
+            <div class="example-element-description">
+              {{element.description}}
+              <span class="example-element-description-attribution"> </span>
+            </div>
+          </div>
           <br />
-         </div>
-        </div>
-        <div class="example-element-description">
-          {{element.description}}
-          <span class="example-element-description-attribution"> </span>
-        </div>
-      </div>
-      <br />
-    </td>
-  </ng-container>
+        </td>
+      </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-  <tr mat-row *matRowDef="let element; columns: columnsToDisplay;"
-      class="example-element-row"
-      [class.example-expanded-row]="expandedElement === element"
-      (click)="expandedElement = expandedElement === element ? null : element">
-  </tr>
-  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
-</table>
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+      <tr mat-row *matRowDef="let element; columns: columnsToDisplay;" class="example-element-row"
+        [class.example-expanded-row]="expandedElement === element"
+        (click)="expandedElement = expandedElement === element ? null : element">
+      </tr>
+      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+    </table>
 
-    </mat-card-content>
+  </mat-card-content>
 </mat-card>
 
 
@@ -112,62 +126,61 @@
 <br /> <br />
 
 <mat-card>
-    <mat-card-header> MY LEND ORDERS   </mat-card-header>
-    <br />
-    <mat-card-content>
-        <table mat-table
-       [dataSource]="lendOrders" multiTemplateDataRows
-       class="mat-elevation-z8">
-  <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
-    <th mat-header-cell *matHeaderCellDef> {{column}} </th>
-    <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
-  </ng-container>
+  <mat-card-header> <span class="span">MY LEND ORDERS</span></mat-card-header>
+  <br />
+    <button mat-button color="accent" id="requestViewAccess"
+                    (click)="getMyOrders()">Refresh</button>
+  <mat-card-content>
+    <table mat-table [dataSource]="myLendOrders" multiTemplateDataRows class="mat-elevation-z8">
+      <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+        <th mat-header-cell *matHeaderCellDef> {{column}} </th>
+        <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+      </ng-container>
 
-  <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
-  <ng-container matColumnDef="expandedDetail">
-    <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length">
-      <div class="example-element-detail"
-           [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-        <div >
-            <br />
+      <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+      <ng-container matColumnDef="expandedDetail">
+        <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length">
+          <div class="example-element-detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
             <div>
-                <span class="loan-meta-data" > Loan Amount : </span>
-                <span class="loan-meta-data" > {{element["Loan Amount"]}} </span>
-            </div>
-            <br />
-            <div>
-                <span class="loan-meta-data" > Order Expiry : {{element["Order Expiry"]}} </span>
-                <span class="loan-meta-data" > Monitoring Fee (in LST) : {{element["Monitoring Fee"]}} </span>
-            </div>
-            <p class="loan-meta-data" >  View Access Requests :  </p>
-            <div>
-                <span  *ngFor="let request of model.viewRequests[element['Loan Hash']]">
-                  <span class="loan-meta-data"> {{request.address}} </span>  
-                  <button mat-button color="accent" id="grantViewAccess" (click)="grantViewAccess(element['Loan Hash'], request.address)">Grant View Access</button>
+              <br />
+              <div>
+                <span class="loan-meta-data"> Loan Amount : </span>
+                <span class="loan-meta-data"> {{element["loan_amount"]}} </span>
+              </div>
+              <br />
+              <div>
+                <span class="loan-meta-data"> Order Expiry : {{element["expires_at"]}} </span>
+                <span class="loan-meta-data"> Monitoring Fee (in LST) : {{element["monitoring_fee"]}} </span>
+              </div>
+              <p class="loan-meta-data"> View Access Requests : </p>
+              <div>
+                <span *ngFor="let request of model.viewRequests[element['hash']]">
+                  <span class="loan-meta-data"> {{request.address}} </span>
+                  <button mat-button color="accent" id="grantViewAccess"
+                    (click)="grantViewAccess(element['hash'], request.address)">Grant View Access</button>
                   <br />
                   <br />
                 </span>
+              </div>
             </div>
-        </div>
-        <div class="example-element-description">
-          {{element.description}}
-          <span class="example-element-description-attribution"> </span>
-        </div>
-      </div>
-      <br />
-    </td>
-  </ng-container>
+            <div class="example-element-description">
+              {{element.description}}
+              <span class="example-element-description-attribution"> </span>
+            </div>
+          </div>
+          <br />
+        </td>
+      </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-  <tr mat-row *matRowDef="let element; columns: columnsToDisplay;"
-      class="example-element-row"
-      [class.example-expanded-row]="expandedElement === element"
-      (click)="expandedElement = expandedElement === element ? null : element">
-  </tr>
-  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
-</table>
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+      <tr mat-row *matRowDef="let element; columns: columnsToDisplay;" class="example-element-row"
+        [class.example-expanded-row]="expandedElement === element"
+        (click)="expandedElement = expandedElement === element ? null : element">
+      </tr>
+      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+    </table>
 
-    </mat-card-content>
+  </mat-card-content>
 </mat-card>
 
 
