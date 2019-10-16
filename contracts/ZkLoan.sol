@@ -19,7 +19,7 @@ contract ZkLoan {
     // Events of the protocol.
     // event ProtocolParameterUpdateNotification(string _notification_key, address indexed _address, uint256 _notification_value);
     // event PositionUpdateNotification(address indexed _wrangler, address indexed _position_address, string _notification_key, uint256 _notification_value);
-
+    event PositionCreated(address indexed _position);
     // Variables of the protocol.
     address public protocol_token_address;
     address public owner;
@@ -270,13 +270,15 @@ contract ZkLoan {
             _addresses[3],
             _intValues[1]
         );
+        emit PositionCreated(address(_new_position));
         // notify wrangler that a position has been opened
         // emit PositionUpdateNotification(_addresses[3], _new_position_address, "status",  POSITION_STATUS_OPEN);
         // unlock position_non_reentrant after loan creation
         // unlock_position(_new_position.hash);
+        // return address(_new_position);
     }
 
-    function close_position(address _position_address, bytes memory repayProof, bytes memory repaySign, bytes memory returnCollateralProof) public returns (bool){
+    function close_position(address _position_address, bytes memory repayProof, bytes memory repaySign, bytes memory repayOutput, bytes memory returnCollateralProof, bytes memory returnCollateralOutput) public returns (bool){
         Position existing_position = Position(_position_address);
         // confirm sender is borrower
         require(msg.sender == existing_position.getBorrower());
@@ -296,7 +298,7 @@ contract ZkLoan {
         (bytes memory _proofInputNotes, bytes memory _proofOutputNotes, ,) = _proofOutputs.get(0).extractProofOutput();
         require(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash == existing_position.getLendCurrencyOwedNotehash());
         ZkERC20(existing_position.getLendCurrencyAddress()).confidentialApprove(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash, address(this), true, repaySign);
-        ZkERC20(existing_position.getLendCurrencyAddress()).confidentialTransferFrom(JOIN_SPLIT_PROOF, _proofOutputs);
+        ZkERC20(existing_position.getLendCurrencyAddress()).confidentialTransferFrom(JOIN_SPLIT_PROOF, repayOutput);
 
 
         // transfer collateral back to borrower
@@ -304,7 +306,7 @@ contract ZkLoan {
         (_proofInputNotes, _proofOutputNotes, ,) = _proofOutputs.get(0).extractProofOutput();
         require(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash == existing_position.getBorrowCurrencyNotehash());
         ZkERC20(existing_position.getBorrowCurrencyAddress()).confidentialApprove(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash, address(this), true, '');
-        ZkERC20(existing_position.getBorrowCurrencyAddress()).confidentialTransferFrom(JOIN_SPLIT_PROOF, _proofOutputs);
+        ZkERC20(existing_position.getBorrowCurrencyAddress()).confidentialTransferFrom(JOIN_SPLIT_PROOF, returnCollateralOutput);
 
 
         // Notify wrangler that a position has been closed
@@ -369,6 +371,7 @@ contract ZkLoan {
                 collateralProof, collateralSign, collateralProofOutput
             );
 
+            
             // transfer relayerFeeLST from kernel creator to relayer
             // if((_kernel.relayer != address(0)) && (_kernel.relayer_fee > 0)){
             //     bool token_transfer = ERC20( protocol_token_address).transferFrom(
