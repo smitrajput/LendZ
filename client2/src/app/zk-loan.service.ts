@@ -6,10 +6,13 @@ import dai from  "../artifacts/DAI.json";
 import weth from "../artifacts/WETH.json";
 import joinsplit from "../artifacts/JoinSplit.json"
 import ace from "../artifacts/ACE.json"
-
+// import web3 from 'web3';
+var Web3 = require("web3");
 import { HttpClient } from '@angular/common/http';
 import { note, JoinSplitProof } from "aztec.js";
 // import {EthCrypto} from 'eth-crypto';
+
+var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/425313c6627e43ddb43324a9419c9508"));
 
 @Injectable({
   providedIn: 'root'
@@ -116,20 +119,27 @@ export class ZkLoanService {
       let dummyPublicKey = "0x047c7b4dfedccb80aa11132e4b5411e96d9fc4057e1cb74a8058ca003fc707473f34d40713927ebdd721bd4ac4f7bef50456a5eff02bc888127c40e2c67eeda823";
       let salt = "0x7bf20bc9c53493cfd19f9378b1bb9f36ceeee7e76b724efeca38f7d1c96f8a04";
 
-      let lendCurrencyNote = note.create(this.addressToPubKey(json_body["lender"]), json_body["loan_amount"]);
+      let lendCurrencyNote = note.create(this.addressToPubKey("0x7924259759c86CAf163128AfD3570Db18925425f"), json_body["loan_amount"]);
       let borrowCurrencyNote = note.create(dummyPublicKey, json_body["collateral_amount"]);
 
-
-      let kernelHash = await this.deployedKernelContract.kernel_hash(
+      let kernelHash = "";
+      kernelHash = web3.utils.sha3(
           [json_body["lender"], json_body["borrower"], json_body["relayer"], json_body["wrangler"], json_body["borrow_currency_address"], json_body["lend_currency_address"]],
           [json_body["monitoring_fee"], json_body["expires_at"], json_body["daily_interest_rate"], json_body["position_duration"]],
-          [lendCurrencyNote.noteHash, borrowCurrencyNote.noteHash, salt]
-      )
+          [lendCurrencyNote.noteHash, borrowCurrencyNote.noteHash, salt])
 
-      json_body["kernel_hash"] = kernelHash;
+      console.log("kernal hash ", kernelHash);
+    //   let kernelHash = await this.deployedKernelContract.kernel_hash(
+    //     [json_body["lender"], json_body["borrower"], json_body["relayer"], json_body["wrangler"], json_body["borrow_currency_address"], json_body["lend_currency_address"]],
+    //     [json_body["monitoring_fee"], json_body["expires_at"], json_body["daily_interest_rate"], json_body["position_duration"]],
+    //     [lendCurrencyNote.noteHash, borrowCurrencyNote.noteHash, salt]
+    // )
+
+      json_body["hash"] = kernelHash;
       json_body["lend_currency_noteHash"] = lendCurrencyNote.noteHash;
-      json_body["borrow_currency_noteHahs"] = borrowCurrencyNote.noteHash;
+      json_body["borrow_currency_noteHash"] = borrowCurrencyNote.noteHash;
 
+      console.log("data to be sent to the api", json_body);
       const url = "http://localhost:8000/kernel";
       this.http.post(url, json_body).subscribe(async(res) => {
         console.log(res);

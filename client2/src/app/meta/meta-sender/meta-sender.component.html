@@ -69,6 +69,8 @@
 <mat-card>
   <mat-card-header><span class="span">AVAILABLE LEND ORDERS</span></mat-card-header>
   <br />
+  <button mat-button color="accent" id="requestViewAccess"
+                    (click)="getOrders()">Refresh</button>
   <mat-card-content>
     <table mat-table [dataSource]="lendOrders" multiTemplateDataRows class="mat-elevation-z8">
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
@@ -84,17 +86,17 @@
               <br />
               <div>
                 <span class="loan-meta-data"> Loan Amount : </span>
-                <span class="loan-meta-data" *ngIf="element['View Request Status']"> {{element["Loan Amount"]}} </span>
+                <span class="loan-meta-data" *ngIf="element['View Request Status']"> {{element["loan_amount"]}} </span>
                 <span class="loan-meta-data" *ngIf="!element['View Request Status']">
                   <button mat-button color="accent" id="requestViewAccess"
-                    (click)="requestViewAccess(element['Loan Hash'], model.account)">Request View Access</button>
+                    (click)="requestViewAccess(element['hash'], model.account)">Request View Access</button>
                 </span>
 
               </div>
               <br />
               <div>
-                <span class="loan-meta-data"> Order Expiry : {{element["Order Expiry"]}} </span>
-                <span class="loan-meta-data"> Monitoring Fee (in LST) : {{element["Monitoring Fee"]}} </span>
+                <span class="loan-meta-data"> Order Expiry : {{element["expires_at"]}} </span>
+                <span class="loan-meta-data"> Monitoring Fee (in LST) : {{element["monitoring_fee"]}} </span>
                 <br />
               </div>
             </div>
@@ -126,8 +128,10 @@
 <mat-card>
   <mat-card-header> <span class="span">MY LEND ORDERS</span></mat-card-header>
   <br />
+    <button mat-button color="accent" id="requestViewAccess"
+                    (click)="getMyOrders()">Refresh</button>
   <mat-card-content>
-    <table mat-table [dataSource]="lendOrders" multiTemplateDataRows class="mat-elevation-z8">
+    <table mat-table [dataSource]="myLendOrders" multiTemplateDataRows class="mat-elevation-z8">
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
         <th mat-header-cell *matHeaderCellDef> {{column}} </th>
         <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
@@ -141,19 +145,19 @@
               <br />
               <div>
                 <span class="loan-meta-data"> Loan Amount : </span>
-                <span class="loan-meta-data"> {{element["Loan Amount"]}} </span>
+                <span class="loan-meta-data"> {{element["loan_amount"]}} </span>
               </div>
               <br />
               <div>
-                <span class="loan-meta-data"> Order Expiry : {{element["Order Expiry"]}} </span>
-                <span class="loan-meta-data"> Monitoring Fee (in LST) : {{element["Monitoring Fee"]}} </span>
+                <span class="loan-meta-data"> Order Expiry : {{element["expires_at"]}} </span>
+                <span class="loan-meta-data"> Monitoring Fee (in LST) : {{element["monitoring_fee"]}} </span>
               </div>
               <p class="loan-meta-data"> View Access Requests : </p>
               <div>
-                <span *ngFor="let request of model.viewRequests[element['Loan Hash']]">
+                <span *ngFor="let request of model.viewRequests[element['hash']]">
                   <span class="loan-meta-data"> {{request.address}} </span>
                   <button mat-button color="accent" id="grantViewAccess"
-                    (click)="grantViewAccess(element['Loan Hash'], request.address)">Grant View Access</button>
+                    (click)="grantViewAccess(element['hash'], request.address)">Grant View Access</button>
                   <br />
                   <br />
                 </span>

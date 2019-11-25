@@ -19,7 +19,7 @@ import { SignerSubprovider, RPCSubprovider, Web3ProviderEngine } from '@0x/subpr
 import { symbol } from 'prop-types';
 var Web3Wrapper = require("@0x/web3-wrapper").Web3Wrapper;
 var http = require('@0x/connect').HttpClient;
-var ENS = require('ethereum-ens');
+// var ENS = require('ethereum-ens');
 
 // var accounts;
 var ens;
@@ -145,7 +145,8 @@ export class MetaSenderComponent implements OnInit {
     accounts: string[];
     assets: any;
     lendOrders = LOAN_DATA;
-    columnsToDisplay = ['loan_id', 'Lending Token', 'Collateral Token', 'Daily Interest Rate', 'Loan Period'];
+    myLendOrders ;
+    columnsToDisplay = ['_id', 'lend_currency_symbol', 'borrow_currency_symbol', 'daily_interest_rate', 'position_duration_month', 'bucket'];
     // expandedElement: PeriodicElement | null;
 
     model = {
@@ -206,7 +207,7 @@ export class MetaSenderComponent implements OnInit {
         console.log('OnInit: ' + this.web3Service);
         console.log(this);
         this.watchAccount();
-
+        this.model.account = "0x7924259759c86CAf163128AfD3570Db18925425f";
         // get important addresses
         const contractAddresses = contract_addresses_1.getContractAddressesForNetworkOrThrow(network_config.NETWORK_ID);
         zrxTokenAddress = contractAddresses.zrxToken;
@@ -231,6 +232,8 @@ export class MetaSenderComponent implements OnInit {
         providerEngine.addProvider(new SignerSubprovider(this.web3Service.getProvider()));
         providerEngine.addProvider(new subproviders_1.RPCSubprovider(network_config.RPC_PROVIDER));
         providerEngine.start();
+        this.getOrders();
+        this.getMyOrders();
 
         // get the accounts available using the provided web3
         (async () => {
@@ -240,16 +243,17 @@ export class MetaSenderComponent implements OnInit {
             console.log(this.web3Service.getProvider());
             [maker, taker] = await web3Wrapper.getAvailableAddressesAsync();
             this.model.account = maker;
-            ens = new ENS(window.ethereum);
-            console.log('ENS', await ens.resolver('tezan.deserves.eth').addr())
-            var name = await ens.reverse(maker).name()
-            if (maker != await ens.resolver(name).addr()) {
-                name = null;
-            }
-            console.log('REVERSE', name)
+            // ens = new ENS(window.ethereum);
+            // console.log('ENS', await ens.resolver('tezan.deserves.eth').addr())
+            // var name = await ens.reverse(maker).name()
+            // if (maker != await ens.resolver(name).addr()) {
+            //     name = null;
+            // }
+            // console.log('REVERSE', name)
             taker = maker;
             console.log("accounts using web3 provider engine");
             console.log(maker + " : " + taker);
+            this.getOrders();
         })();
 
 
@@ -267,8 +271,40 @@ export class MetaSenderComponent implements OnInit {
         });
     }
 
+    get_bucket(){
+        if (parseInt(this.model.loan_amount)<10)
+        return "1-10";
+        if (parseInt(this.model.loan_amount)<100)
+        return "10-100";
+        if (parseInt(this.model.loan_amount)<1000)
+        return "100-1000";
+        else 
+        return "1000 - ";
+        
+    }
     async refreshBalance() {
         console.log("refreshing balance...");
+    }
+    async getOrders(){
+        this.setStatus("Refreshing the order book ....");
+        var url = "http://localhost:8000/kernel/";
+        this.http.get(url).subscribe(async(res) => {
+            console.log("orders", res["result"]);
+            this.lendOrders = res["result"];
+            this.setStatus("OrderBook Updated!");
+          });
+        //   await this.getMyOrders(); 
+    }
+
+    async getMyOrders(){
+        this.setStatus("Refreshing my lend orders ....");
+        var url = "http://localhost:8000/kernel/lender/" + this.model.account;
+        console.log("url for my orders", url);
+        this.http.get(url).subscribe(async(res) => {
+            console.log("orders", res["result"]);
+            this.myLendOrders = res["result"];
+            this.setStatus("My Orders Updated!");
+          });
     }
 
     // for pop ups with messages of different duration.
@@ -323,16 +359,20 @@ export class MetaSenderComponent implements OnInit {
         this.model.monitoring_fee = e.target.value;
     }
 
+    async get_collateral_amount(){
+        var amount = parseInt(this.model.loan_amount) * this.getRate(this.model.lending_token, this.model.collateral_token);
+        return amount;
+    }
 
     async placeOrder() {
-
+        
         var body = {
-            "lender" :this.model.account,
+            "lender" :"0x7924259759c86CAf163128AfD3570Db18925425f",
             "borrower": "0x0000000000000000000000000000000000000000",
             "relayer": "0x0000000000000000000000000000000000000000",
             "wrangler": "0x0000000000000000000000000000000000000000",
             "borrow_currency_symbol": this.model.collateral_token,
-            "lend_curency_symbol": this.model.lending_token,
+            "lend_currency_symbol": this.model.lending_token,
             "borrow_currency_address": tokenAddresses[this.model.collateral_token],
             "lend_currency_address":tokenAddresses[this.model.lending_token],
             "expires_at":this.model.order_expiry,
@@ -341,11 +381,13 @@ export class MetaSenderComponent implements OnInit {
             "position_duration_month": this.model.loan_period,
             "position_duration":loanPeriodInSeconds[this.model.loan_period],
             "loan_amount": parseInt(this.model.loan_amount),
-            "collateral_amount": parseInt(this.model.loan_amount) * this.getRate(this.model.lending_token, this.model.collateral_token)
+            "collateral_amount": this.get_collateral_amount(),
+            "bucket":this.get_bucket()
         }
         console.log("placing order : ", body);
-
+        this.setStatus("Placing your order in the orderbook...");
         const status = <Boolean>await this.zkLoanService.createKernel(body);
+        this.setStatus("Order Placed!");
             // this.model.account, 
             // tokenAddresses[this.model.collateral_token], 
             // tokenAddresses[this.model.lending_token],
@@ -354,9 +396,6 @@ export class MetaSenderComponent implements OnInit {
             // this.model.order_expiry,
             // this.model.daily_interest_rate,
             // loanPeriodInSeconds[this.model.loan_period]
-        
-
-
         // })
 
 
