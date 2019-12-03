@@ -51,6 +51,7 @@ contract('ZkLoan', (accounts) => {
     let zkERC20_BInstance;
     let protocolTokenInstance;
     const sender = accounts[0];
+    console.log(sender);
     // const protocolTokenAddress = web3.utils.toChecksumAddress("0xf1d712736ff2b06dda9ba03d959aa70a297ad99b");
 
     let lender = aztecAccounts[0];
