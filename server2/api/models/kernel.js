@@ -7,6 +7,7 @@ const kernelSchema = mongoose.Schema({
     borrower:{type:String},
     relayer:{type:String},
     wrangler:{type:String},
+    loan_amount:{type:Number},
     borrow_currency_symbol:{type:String},
     borrow_currency_address:{type:String},
     lend_currency_symbol:{type:String},
@@ -17,7 +18,8 @@ const kernelSchema = mongoose.Schema({
     expires_at:{type:Number},
     daily_interest_rate:{type:Number},
     position_duration:{type:Number},
-    position_duration_month:{type:String}
+    position_duration_month:{type:String},
+    bucket:{type:String}
 })
 
 module.exports = mongoose.model('Kernel', kernelSchema);
