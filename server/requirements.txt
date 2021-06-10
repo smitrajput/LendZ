@@ -15,7 +15,7 @@ eth-keys==0.2.4
 eth-rlp==0.1.2
 eth-typing==2.1.0
 eth-utils==1.6.2
-fastapi==0.33.0
+fastapi==0.65.2
 h11==0.8.1
 hexbytes==0.2.0
 httptools==0.0.13
