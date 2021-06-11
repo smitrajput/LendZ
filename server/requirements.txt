@@ -48,6 +48,6 @@ uvicorn==0.8.6
 uvloop==0.12.2
 varint==1.0.2
 web3==5.0.0
-websockets==7.0
+websockets==9.1
 wrapt==1.11.2
 zmq==0.0.0
